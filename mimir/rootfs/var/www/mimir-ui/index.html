@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafana Mimir - Home Assistant Ingress</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Ingress Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">M</div>
+      <div>
+        <div class="brand-title">Grafana Mimir</div>
+        <div class="brand-subtitle">Home Assistant Ingress Control Center (SpiritsCorp)</div>
+      </div>
+    </div>
+    <div id="status-badge" class="status-badge loading">
+      <div class="pulse-dot"></div>
+      <span id="status-text">Verbinde mit Mimir...</span>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-dashboard')">📊 Übersicht</button>
+    <button class="tab-btn" onclick="switchTab('tab-services')">⚙️ Mimir Services (/services)</button>
+    <button class="tab-btn" onclick="switchTab('tab-config')">💍 Live Configuration (/config)</button>
+    <button class="tab-btn" onclick="switchTab('tab-metrics')">📈 Live Metriken (/metrics)</button>
+    <button class="tab-btn" onclick="switchTab('tab-integration')">🔌 Home Assistant Setup</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main>
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-pane active">
+      <div class="grid-cards">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Readiness Status</span></div>
+          <div id="dash-ready-val" class="stat-val">Prüfe...</div>
+          <div class="stat-desc">Interner HTTP Probe über Nginx Ingress-Proxy</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Prometheus Remote-Write</span></div>
+          <div class="stat-val" style="font-size: 18px; color: #38bdf8;">Interner Port 9009</div>
+          <div class="stat-desc">Direkte Push-Übertragung ohne offenes LAN-Risiko</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Grafana Datasource</span></div>
+          <div class="stat-val" style="font-size: 18px; color: #a855f7;">Prometheus API</div>
+          <div class="stat-desc">Grafana Mimir TSDB Langzeit-Abfragen</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <div class="card-header"><span class="card-title">Interne Endpunkte für Home Assistant & Grafana</span></div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Nutze im Home Assistant Docker-Netzwerk direkt den Hostnamen der App.
+          So muss Port 9009 <strong>nicht</strong> ungesichert in deinem Heimnetzwerk geöffnet werden:
+        </p>
+
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Home Assistant Prometheus Remote-Write URL:</div>
+        <div class="code-block">
+          <span id="url-remote-write">http://localhost:9009/api/v1/push</span>
+          <button class="copy-btn" onclick="copyText('url-remote-write', this)">Kopieren</button>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 14px; margin-bottom: 6px;">Grafana Datasource URL (Prometheus):</div>
+        <div class="code-block">
+          <span id="url-datasource">http://localhost:9009/prometheus</span>
+          <button class="copy-btn" onclick="copyText('url-datasource', this)">Kopieren</button>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 14px; margin-bottom: 6px;">Relativer Ingress Health-Check Endpunkt:</div>
+        <div class="code-block">
+          <span id="url-health-rel">./proxy/mimir/ready</span>
+          <button class="copy-btn" onclick="copyText('url-health-rel', this)">Kopieren</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: MIMIR SERVICES (EMBEDDED) -->
+    <div id="tab-services" class="tab-pane">
+      <div class="iframe-container">
+        <div class="iframe-toolbar">
+          <span class="iframe-url">Interner Ingress-Pfad: <strong>proxy/mimir/services</strong></span>
+          <button class="btn-sm" onclick="reloadFrame('frame-services', 'services')">↻ Neu laden</button>
+        </div>
+        <iframe id="frame-services" src="about:blank"></iframe>
+      </div>
+    </div>
+
+    <!-- TAB 3: CONFIGURATION (EMBEDDED) -->
+    <div id="tab-config" class="tab-pane">
+      <div class="iframe-container">
+        <div class="iframe-toolbar">
+          <span class="iframe-url">Interner Ingress-Pfad: <strong>proxy/mimir/config</strong></span>
+          <button class="btn-sm" onclick="reloadFrame('frame-config', 'config')">↻ Neu laden</button>
+        </div>
+        <iframe id="frame-config" src="about:blank"></iframe>
+      </div>
+    </div>
+
+    <!-- TAB 4: METRICS EXPLORER -->
+    <div id="tab-metrics" class="tab-pane">
+      <input type="text" id="metric-filter" class="filter-input" placeholder="Metriken filtern (z.B. cortex_, mimir_, tsdb, http)..." oninput="filterMetrics()">
+      <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <button class="btn-sm" onclick="loadMetrics()">↻ Metriken abrufen</button>
+        <button class="btn-sm" onclick="copyText('metrics-output', this)">In die Zwischenablage kopieren</button>
+      </div>
+      <pre id="metrics-output" class="metrics-log">Klicke oben auf 'Metriken abrufen'...</pre>
+    </div>
+
+    <!-- TAB 5: HOME ASSISTANT SETUP -->
+    <div id="tab-integration" class="tab-pane">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Home Assistant configuration.yaml Snippet</span></div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Füge diesen Block in deine <code style="color: #38bdf8;">/config/configuration.yaml</code> ein, um Sensorwerte ohne zusätzliche Scraper in Mimir zu speichern:
+        </p>
+        <div class="code-block" style="white-space: pre;">prometheus:
+  namespace: homeassistant
+  component_config:
+    sensor:
+      override_timestamp: true
+  filter:
+    include_domains:
+      - sensor
+      - binary_sensor
+      - climate
+      - switch
+      - light
+    exclude_entity_globs:
+      - sensor.*_last_seen
+      - sensor.*_uptime
+  default_metric: homeassistant_sensor</div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast">In die Zwischenablage kopiert!</div>
+
+  <!-- Ingress Logic -->
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+# Home Assistant App Configuration
+# Built for network.spiritscorp / ha_apps_spiritscorp
+name: "Grafana Mimir"
+version: "0.8.2"
+slug: "mimir"
+description: "Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant."
+url: "https://github.com/mastertomspirit/ha_apps_spiritscorp/tree/main/mimir"
+arch:
+  - aarch64
+  - amd64
+init: true
+timeout: 60
+stage: "stable"
+
+# UI Ingress integration into Home Assistant sidebar
+ingress: true
+ingress_port: 34520
+panel_icon: "mdi:chart-timeline-variant-shimmer"
+panel_title: "Mimir Metrics"
+
+# Mimir Network Ports
+ports:
+  "9009/tcp": 9009
+
+# Host Filesystem mappings
+# Note: /data is the default persistent storage volume provided automatically by Supervisor.
+# We map homeassistant_config:ro to allow reading custom Mimir YAML files from default: /homeassistant/mimir.yaml.
+map:
+  - type: homeassistant_config
+    path: /homeassistant
+    read_only: true
+  - type: app_config
+    path: /config
+    read_only: false
+  - type: ssl
+    read_only: true
+
+# Options Schema validation
+schema:
+  log_level: list(debug|info|warn|error)
+  retention_period: str
+  auth_token_enabled: bool
+  auth_user: str?
+  auth_token: password?
+  custom_config: bool?
+  custom_config_file: str?
+  multitenancy_enabled: bool?
+  default_tenant_id: str?
+  storage_backend: list(filesystem|s3|minio)?
+  storage_path: str?
+  s3_endpoint: str?
+  s3_bucket_name: str?
+  s3_access_key: str?
+  s3_secret_key: password?
+  s3_insecure: bool?
+  s3_region: str?
+  tls_enabled: bool?
+  certfile: str?
+  keyfile: str?
+#  TODO: Implement mTLS in nginx 
+#  client_ca_file: str?
+#  require_client_auth: bool?
+  max_global_series_per_user: int?
+  ingestion_rate_mb: int?
+  ingestion_burst_size_mb: int?
+  ruler_api_enabled: bool?
+  alertmanager_api_enabled: bool?
+
+# Default Options
+# Standard community app practice: Keep default options minimal to avoid cluttering the HA UI.
+# Advanced parameters remain declared in schema (optional) and can be added when needed.
+options:
+  log_level: "warn"
+  retention_period: "180d"
+  auth_token_enabled: true
+  auth_user: "homeassistant"
+  auth_token: "mimir_secret_token_change_me"
+  tls_enabled: true
+  certfile: "/ssl/fullchain.pem"
+  keyfile: "/ssl/privkey.pem"

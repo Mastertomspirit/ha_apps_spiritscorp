@@ -1,0 +1,85 @@
+# Home Assistant UI Translation - Deutsch (de.yaml)
+network:
+  9009/tcp: "Grafana Mimir HTTP-API, PromQL-Abfragen und Prometheus Remote-Write (Standard: 9009)"
+configuration:
+  log_level:
+    name: "Protokollierungsgrad (Log Level)"
+    description: "Ausführlichkeit der Protokollmeldungen (Standard: warn)."
+  auth_token_enabled:
+    name: "Basic-Auth Authentifizierung aktivieren"
+    description: "Schützt die Mimir Remote-Write & Query-Endpunkte mit HTTP Basic Auth (Benutzername und Passwort/Token) (Standard: true)."
+  auth_user:
+    name: "Benutzername (Auth User)"
+    description: "Benutzername für die HTTP Basic-Auth Authentifizierung an den Mimir-Endpunkten."
+  auth_token:
+    name: "Passwort / Zugriffs-Token (Auth Token)"
+    description: "Geheimes Passwort oder Token für die HTTP Basic-Auth Authentifizierung."
+  multitenancy_enabled:
+    name: "Multi-Mandantenfähigkeit (Multi-Tenancy)"
+    description: "Trennt Metriken strikt nach Mandanten-IDs (X-Scope-OrgID). Für Standard-Setups empfohlen: Deaktiviert (Single-Tenant)."
+  default_tenant_id:
+    name: "Default Tenant-ID"
+    description: "Standard Mandanten-Kennung für Metriken, wenn multitenancy deaktiviert ist (Standard: homeassistant)."
+  retention_period:
+    name: "Aufbewahrungsdauer (Retention)"
+    description: "Zeitraum, wie lange Zeitreihendaten gespeichert werden (z.B. 90d, 3m, 1y) (Standard: 180d)."
+  storage_backend:
+    name: "Speicher-Backend"
+    description: "Lokales Dateisystem (filesystem) oder Object Storage (s3 / MinIO) (Standard: filesystem)."
+  storage_path:
+    name: "Speicherpfad"
+    description: "Lokales Datenverzeichnis in der App (Standard: /data/mimir)."
+  s3_endpoint:
+    name: "S3 / MinIO Endpunkt"
+    description: "Hostname und Port des S3-kompatiblen Objektspeichers (z. B. minio.local:9000)."
+  s3_bucket_name:
+    name: "S3 Bucket Name"
+    description: "Name des S3-Buckets für TSDB-Metrik-Blöcke."
+  s3_access_key:
+    name: "S3 Access Key"
+    description: "Zugriffsschlüssel für den S3-Speicher."
+  s3_secret_key:
+    name: "S3 Secret Key"
+    description: "Geheimer Zugriffsschlüssel für den S3-Speicher."
+  s3_insecure:
+    name: "S3 Insecure)"
+    description: "Aktivieren, falls MinIO/S3 ohne TLS/SSL (reines HTTP) betrieben wird (Standard: false)."
+  s3_region:
+    name: "S3-Region"
+    description: "Die AWS-Region oder der Standort des S3-kompatiblen Speichers (Standard: de-south-1)."
+  tls_enabled:
+    name: "HTTPS / TLS Verschlüsselung"
+    description: "Aktiviert SSL/TLS-Verschlüsselung für Mimir HTTP und gRPC-Endpunkte (Standard: true)."
+  certfile:
+    name: "SSL-Zertifikatsdatei"
+    description: "Pfad zum TLS-Zertifikat (Standard: /ssl/fullchain.pem)."
+  keyfile:
+    name: "SSL-Schlüsseldatei"
+    description: "Pfad zum privaten TLS-Schlüssel (Standard: /ssl/privkey.pem)."
+  client_ca_file:
+    name: "Client CA Zertifikat (mTLS)"
+    description: "Optionaler Pfad zum CA-Zertifikat für gegenseitige Zertifikatsprüfung (mTLS)."
+  require_client_auth:
+    name: "Client-Zertifikat erzwingen"
+    description: "Erfordert gültige Client-Zertifikate für jede eingehende Anfrage."
+  max_global_series_per_user:
+    name: "Maximale Metrik-Serien pro Mandant"
+    description: "Schutzgrenze gegen Kardinalitäts-Explosionen (Standard: 250.000 Zeitreihen)."
+  ingestion_rate_mb:
+    name: "Maximale Ingestion-Rate (MB/s)"
+    description: "Maximaler Schreibdurchsatz in Megabytes pro Sekunde (Standard: 25 MB/s)."
+  ingestion_burst_size_mb:
+    name: "Burst-Größe (MB)"
+    description: "Kurzzeitige Durchsatzspitzen beim Massen-Upload (Standard: 50 MB)."
+  custom_config:
+    name: "Eigene mimir.yaml verwenden"
+    description: "Aktivieren, um eine externe Mimir-YAML-Konfigurationsdatei zu nutzen (Standard: false)."
+  custom_config_file:
+    name: "Dateiname der eigenen mimir.yaml"
+    description: "Relativer Pfad ausgehend vom Hauptverzeichnis (/config bzw. /homeassistant). Z. B. 'mimir.yaml' oder 'mimir/custom.yaml'."
+  ruler_api_enabled:
+    name: "Ruler & Recording Rules"
+    description: "Führt server-seitige PromQL Berechnungen und Alarmierungsregeln aus (Standard: false)."
+  alertmanager_api_enabled:
+    name: "Alertmanager aktivieren"
+    description: "Integrierter Alertmanager für Schwellenwert-Benachrichtigungen (Standard: false)."

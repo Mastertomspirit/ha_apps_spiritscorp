@@ -1,0 +1,342 @@
+/* =====================================================================
+ * Grafana Mimir - Home Assistant Ingress Stylesheet (style.css)
+ * ===================================================================== */
+:root {
+  --bg-base: #0b0f19;
+  --bg-surface: #131d2e;
+  --bg-card: #182234;
+  --border: #233249;
+  --border-focus: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-hover: #0284c7;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --code-bg: #070a12;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.brand-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.loading {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Navigation Tabs */
+nav.tabs {
+  background: #0e1626;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  padding: 0 20px;
+  gap: 4px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+/* Content Area */
+main {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.tab-pane {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+}
+
+.tab-pane.active {
+  display: flex;
+}
+
+/* Grid & Cards */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.stat-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.stat-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Code Snippets & Inputs */
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: #e2e8f0;
+  position: relative;
+  margin-top: 8px;
+  word-break: break-all;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--border);
+  border: 1px solid #3b4d6b;
+  color: var(--text-main);
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copy-btn:hover {
+  background: var(--accent);
+  color: #0b0f19;
+  font-weight: 600;
+}
+
+/* Embedded iFrames */
+.iframe-container {
+  flex: 1;
+  width: 100%;
+  min-height: 620px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.iframe-toolbar {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iframe-url {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.btn-sm {
+  background: var(--border);
+  border: 1px solid #3b4d6b;
+  color: var(--text-main);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-sm:hover {
+  background: var(--accent);
+  color: #0b0f19;
+  font-weight: 600;
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  flex: 1;
+  min-height: 560px;
+}
+
+/* Explorer */
+.filter-input {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: white;
+  width: 100%;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.metrics-log {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: monospace;
+  font-size: 12px;
+  height: 500px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+/* Toast Notification */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #10b981;
+  color: #041f14;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}

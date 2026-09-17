@@ -1,0 +1,42 @@
+name: "Build & Publish Home Assistant App"
+
+on:
+  release:
+    types: ["published"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "App target folder to build (e.g. mimir)"
+        required: true
+        default: "mimir"
+      version:
+        description: "Version to build and publish (e.g. 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  build:
+    name: "Build Multi-Arch App (home-assistant/actions/builder)"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v7
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v7
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Build & Publish App with Official HA Builder"
+        uses: home-assistant/actions/builder@master
+        with:
+          args: |
+            --all \
+            --target ${{ github.event.inputs.target || 'mimir' }} \
+            --image "${{ github.event.inputs.target || 'mimir' }}-{arch}" \
+            --docker-hub ghcr.io/${{ github.repository_owner }}

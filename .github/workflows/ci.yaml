@@ -1,0 +1,43 @@
+name: "CI & App Validation"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  validate:
+    name: "Validate App & Dockerfile"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v7
+
+      - name: "Set up Python & ShellCheck"
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: "Install yamllint & pyyaml"
+        run: pip install pyyaml yamllint
+
+      - name: "Run ShellCheck on test scripts"
+        run: |
+          find . -type f -name "*.sh" -exec shellcheck {} +
+
+      - name: "Run App Test Suite"
+        run: |
+          cd mimir/tests
+          chmod +x ./validate.sh
+          ./validate.sh
+
+      - name: "Verify Multi-Arch Docker Build "
+        uses: home-assistant/actions/builder@master
+        with:
+          args: |
+            --test \
+            --all \
+            --target mimir \
+            --image "mimir-{arch}" \
+            --docker-hub "ghcr.io/${{ github.repository_owner }}"

@@ -1,0 +1,85 @@
+# Home Assistant UI Translation - English (en.yaml)
+network:
+  9009/tcp: "Default port for Prometheus Remote-Write and PromQL queries (Default: 9009)."
+configuration:
+  log_level:
+    name: "Log Level"
+    description: "Verbosity of log messages (Default: warn)."
+  auth_token_enabled:
+    name: "Enable Basic Auth authentication"
+    description: "Protects Mimir remote-write & query endpoints with HTTP Basic Auth (username and password/token). (Default: true)"
+  auth_user:
+    name: "Username (Auth User)"
+    description: "Username for HTTP Basic Auth authentication on Mimir endpoints."
+  auth_token:
+    name: "Password / Access Token (Auth Token)"
+    description: "Secret password or token for HTTP Basic Auth authentication."
+  multitenancy_enabled:
+    name: "Multi-Tenancy"
+    description: "Strictly separates time-series by Tenant ID (X-Scope-OrgID). Recommended for standard setups: Disabled (Single-Tenant)."
+  default_tenant_id:
+    name: "Default Tenant ID"
+    description: "Default tenant identifier for metrics when multitenancy is disabled (Default: homeassistant)."
+  retention_period:
+    name: "Retention Period"
+    description: "How long metric data is kept before deletion (e.g. 90d, 3m, 1y) (Default: 180d)."
+  storage_backend:
+    name: "Storage Backend"
+    description: "Local storage (filesystem) or Object Storage (s3 / MinIO). (Default: filesystem)"
+  storage_path:
+    name: "Storage Path"
+    description: "Local data directory within the add-on (Default: /data/mimir)."
+  s3_endpoint:
+    name: "S3 / MinIO Endpoint"
+    description: "Hostname and port of S3-compatible object storage (e.g. minio.local:9000)."
+  s3_bucket_name:
+    name: "S3 Bucket Name"
+    description: "Name of the target S3 bucket for TSDB blocks."
+  s3_access_key:
+    name: "S3 Access Key"
+    description: "Access Key ID for S3 storage."
+  s3_secret_key:
+    name: "S3 Secret Key"
+    description: "Secret Access Key for S3 storage."
+  s3_insecure:
+    name: "S3 Insecure"
+    description: "Enable if your MinIO/S3 server runs without TLS/SSL (Default: false)."
+  s3_region:
+    name: "S3 Region"
+    description: "The AWS region or location of the S3-compatible storage (Default: de-south-1)."
+  tls_enabled:
+    name: "HTTPS / TLS Encryption"
+    description: "Enables TLS encryption for Mimir HTTP and gRPC ports. (Default: true)"
+  certfile:
+    name: "SSL Certificate File"
+    description: "Path to the public certificate (Default: /ssl/fullchain.pem)."
+  keyfile:
+    name: "SSL Private Key File"
+    description: "Path to the private key (Default: /ssl/privkey.pem)."
+  client_ca_file:
+    name: "Client CA Certificate (mTLS)"
+    description: "Optional path to CA certificate for mutual TLS authentication."
+  require_client_auth:
+    name: "Require Client Certificate"
+    description: "Enforces valid client certificates on every incoming request."
+  max_global_series_per_user:
+    name: "Maximum Series per Tenant"
+    description: "Safeguard against high-cardinality explosions (Default: 250,000 series)."
+  ingestion_rate_mb:
+    name: "Max Ingestion Rate (MB/s)"
+    description: "Maximum write throughput in megabytes per second (Default: 25 MB/s)."
+  ingestion_burst_size_mb:
+    name: "Burst Size (MB)"
+    description: "Short-term burst capacity for metric spikes (Default: 50 MB)."
+  custom_config:
+    name: "Use Custom Mimir Configuration"
+    description: "Enable to use an external custom Mimir YAML configuration file (Default: false)."
+  custom_config_file:
+    name: "Custom Mimir File Name"
+    description: "Relative path starting from the root configuration directory (/config or /homeassistant). E.g., 'mimir.yaml' or 'mimir/custom.yaml'."
+  ruler_api_enabled:
+    name: "Ruler & Recording Rules"
+    description: "Executes server-side PromQL recording and alerting rules (Default: false)."
+  alertmanager_api_enabled:
+    name: "Enable Alertmanager"
+    description: "Built-in Alertmanager for threshold notifications (Default: false)."
