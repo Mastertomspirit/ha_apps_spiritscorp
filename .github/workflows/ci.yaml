@@ -69,11 +69,10 @@ jobs:
         with:
           architectures: ${{ env.ARCHITECTURES }}
           image-name:  "ha-spiritscorp-${{ matrix.target }}"
-          path: ${{ matrix.target }}
 
   verify_build:
     name: "Verify ${{ matrix.arch }} Docker Build (${{ matrix.target }})"
-    needs: init
+    needs: [resolve-targets, init]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read # To check out the code
@@ -90,7 +89,7 @@ jobs:
         uses: home-assistant/builder/actions/build-image@2026.09.0
         with:
           arch: ${{ matrix.arch }}
-          path: ${{ matrix.target }}
+          context: ${{ matrix.target }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           push: "false"
