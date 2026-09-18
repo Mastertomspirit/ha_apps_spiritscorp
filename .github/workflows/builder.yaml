@@ -16,30 +16,18 @@ on:
 
 jobs:
   build:
-    name: "Build Multi-Arch App (home-assistant/builder)"
-    runs-on: ubuntu-latest
+    name: "Build Multi-Arch App Images"
     permissions:
       contents: read
       packages: write
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v7
-        with:
-           ref: ${{ inputs.version || github.ref }}       
-        
-      - name: "Login to GitHub Container Registry"
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Build App Container"
-        uses: home-assistant/builder@master
-        with:
-          args: |
-            --amd64 \
-            --aarch64 \
-            --target ${{ inputs.target || 'mimir' }} \
-            --image "ha-spiritscorp-${{ inputs.target || 'mimir' }}-{arch}" \
-            --docker-hub "ghcr.io/${{ github.repository_owner }}"
+    uses: home-assistant/actions/.github/workflows/builder.yaml@v1
+    with:
+      args: |
+        --amd64 \
+        --aarch64 \
+        --target ${{ inputs.target || 'mimir' }} \
+        --version ${{ inputs.version || github.ref_name }} \        
+        --image "ha-spiritscorp-${{ inputs.target || 'mimir' }}-{arch}" \
+        --docker-hub "ghcr.io/${{ github.repository_owner }}"
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}

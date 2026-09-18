@@ -31,13 +31,19 @@ jobs:
           chmod +x mimir/tests/validate.sh
           mimir/tests/validate.sh
           
-      - name: "Verify Multi-Arch Docker Build"
-        uses: home-assistant/builder@master
-        with:
-          args: |
-            --test \
-            --amd64 \
-            --aarch64 \
-            --target mimir \
-            --image "mimir-{arch}" \
-            --docker-hub "ghcr.io/${{ github.repository_owner }}"
+  build:
+    name: "Verify Multi-Arch Docker Build"
+    permissions:
+      contents: read
+    uses: home-assistant/actions/.github/workflows/builder.yaml@v1
+    with:
+      args: |
+        --test \
+        --amd64 \
+        --aarch64 \
+        --target ${{ inputs.target || 'mimir' }} \
+        --version ${{ inputs.version || github.ref_name }} \        
+        --image "ha-spiritscorp-${{ inputs.target || 'mimir' }}-{arch}" \
+        --docker-hub "ghcr.io/${{ github.repository_owner }}"
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
