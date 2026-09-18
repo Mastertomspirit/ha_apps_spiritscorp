@@ -2,7 +2,7 @@ name: "CI & App Validation"
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main" , "fix/*"]
   pull_request:
     branches: ["main"]
 
@@ -33,7 +33,7 @@ jobs:
           ./validate.sh
 
       - name: "Verify Multi-Arch Docker Build "
-        uses: home-assistant/actions/builder@master
+        uses: home-assistant/builder@master
         with:
           args: |
             --test \
