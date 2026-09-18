@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: home-assistant/actions/.github/workflows/builder.yaml@v1
+    uses: home-assistant/actions/.github/workflows/builder.yaml@master
     with:
       args: |
         --amd64 \

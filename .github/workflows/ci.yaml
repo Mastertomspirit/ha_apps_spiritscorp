@@ -35,7 +35,7 @@ jobs:
     name: "Verify Multi-Arch Docker Build"
     permissions:
       contents: read
-    uses: home-assistant/actions/.github/workflows/builder.yaml@v1
+    uses: home-assistant/actions/.github/workflows/builder.yaml@master
     with:
       args: |
         --test \
