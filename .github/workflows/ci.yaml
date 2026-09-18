@@ -90,6 +90,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           context: ${{ matrix.target }}
+          file: "${{ matrix.target }}/Dockerfile"
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           push: "false"
