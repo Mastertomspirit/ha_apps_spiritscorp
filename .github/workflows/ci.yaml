@@ -13,7 +13,7 @@ env:
 jobs:
   test_mimir:
     name: "Validate Mimir App & Dockerfile"
-    runs-on: ubuntu-26
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v7
@@ -38,7 +38,7 @@ jobs:
   init:
     name: "Initialize Build"
     needs: test_mimir
-    runs-on: ubuntu-26
+    runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.filter.outputs.changed }}
       changed_apps: ${{ steps.filter.outputs.changed_apps }}

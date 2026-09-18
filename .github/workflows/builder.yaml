@@ -20,7 +20,7 @@ env:
 jobs:
   init:
     name: "Initialize Build"
-    runs-on: ubuntu-26
+    runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.filter.outputs.changed }}
       changed_apps: ${{ steps.filter.outputs.changed_apps }}

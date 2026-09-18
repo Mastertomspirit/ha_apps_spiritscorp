@@ -16,7 +16,7 @@ on:
 jobs:
   prepare:
     name: Prepare
-    runs-on: ubuntu-26
+    runs-on: ubuntu-latest
     outputs:
       architectures: ${{ steps.info.outputs.architectures }}
       build_matrix: ${{ steps.matrix.outputs.matrix }}
@@ -103,7 +103,7 @@ jobs:
     name: Publish multi-arch manifest
     needs: [prepare, build]
     if: inputs.publish
-    runs-on: ubuntu-26
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       packages: write
