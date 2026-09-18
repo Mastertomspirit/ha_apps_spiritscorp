@@ -10,7 +10,7 @@ on:
         required: false
         default: "mimir"
       version:
-        description: "Git Tag or Branch to checkout (Default: main)"
+        description: "Git Tag or Branch (Default: main)"
         required: false
         default: "main"
 
