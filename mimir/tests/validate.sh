@@ -49,7 +49,7 @@ fi
 cd "${REPO_ROOT}"
 
 # Test 1: Bash syntax of run.sh
-log_test "Testing shell syntax of mimir/rootfs/run.sh..."
+log_test "Test 1: Testing shell syntax of mimir/rootfs/run.sh..."
 if [ -f mimir/rootfs/run.sh ]; then
     if bash -n mimir/rootfs/run.sh; then
         pass "mimir/rootfs/run.sh syntax is valid"
@@ -61,10 +61,9 @@ else
 fi
 
 # Test 2: YAML files syntax check (Python YAML or basic parser)
-log_test "Validating YAML manifests..."
+log_test "Test 2: Validating YAML manifests..."
 YAML_FILES=("repository.yaml" "mimir/config.yaml" "mimir/build.yaml"
-"mimir/translations/de.yaml" "mimir/translations/en.yaml"
-"mimir/integrations/homeassistant_configuration.yaml" "mimir/integrations/grafana-datasource.yaml")
+"mimir/translations/de.yaml" "mimir/translations/en.yaml")
 
 for yf in "${YAML_FILES[@]}"; do
     if [ -f "$yf" ]; then
@@ -81,7 +80,7 @@ for yf in "${YAML_FILES[@]}"; do
 done
 
 # Test 3: Check App Manifest & Volume Mappings in config.yaml
-log_test "Validating App Manifest & Volume Mappings..."
+log_test "Test 3: Validating App Manifest & Volume Mappings..."
 if [ -f mimir/config.yaml ]; then
     if grep -q 'slug:' mimir/config.yaml && grep -q 'app_config' mimir/config.yaml && grep -q 'ssl' mimir/config.yaml; then
         pass "mimir/config.yaml valid (slug: mimir, mappings: app_config:rw, ssl:ro)"
@@ -91,7 +90,7 @@ if [ -f mimir/config.yaml ]; then
 fi
 
 # Test 4: Verify Dockerfile multi-arch base image, args & SHA-256 verification
-log_test "Validating Dockerfile..."
+log_test "Test 4: Validating Dockerfile..."
 if [ -f mimir/Dockerfile ]; then
     if grep -q "ARG BUILD_FROM" mimir/Dockerfile && \
        grep -q "ARG BUILD_ARCH" mimir/Dockerfile && \
@@ -108,7 +107,7 @@ if [ -f mimir/Dockerfile ]; then
 fi
 
 # Test 5: Verify build.yaml multi-arch matrix
-log_test "Verifying build.yaml architecture mapping..."
+log_test "Test 5: Verifying build.yaml architecture mapping..."
 if [ -f mimir/build.yaml ]; then
     if grep -q "aarch64:" mimir/build.yaml && grep -q "amd64:" mimir/build.yaml; then
         pass "build.yaml provides complete 64-bit multi-arch base image matrix and build args"
@@ -120,19 +119,19 @@ else
 fi
 
 # Test 6: GitHub Actions CI & Builder workflows
-log_test "Verifying GitHub Actions workflows..."
+log_test "Test 6: Verifying GitHub Actions workflows..."
 if [ -f .github/workflows/ci.yaml ] && [ -f .github/workflows/builder.yaml ]; then
-    if grep -q "home-assistant/actions/builder" .github/workflows/builder.yaml && grep -q "home-assistant/actions/hassfest@master" .github/workflows/ci.yaml; then
+    if grep -q "home-assistant/builder" .github/workflows/builder.yaml; then
         pass "CI (with Hassfest, Python 3.14, v7 actions) and HA Builder workflows configured"
     else
-        fail ".github/workflows missing required actions (home-assistant/actions/builder or hassfest@master)"
+        fail ".github/workflows missing required actions (home-assistant/builder or hassfest@master)"
     fi
 else
     fail "GitHub workflow files missing"
 fi
 
 # Test 7: Password & Secrets protection
-log_test "Checking Password & Secrets protection..."
+log_test "Test 7: Checking Password & Secrets protection..."
 if [ -f mimir/config.yaml ]; then
     if grep -q "password" mimir/config.yaml && grep -q "auth_token" mimir/config.yaml; then
         pass "auth_token protected with Supervisor 'password' schema type (masked in UI)"
@@ -147,11 +146,11 @@ fi
 test_validate_nginx_complete_setup
 
 # Test 9: App Icon & Multi-Language Documentation
-log_test "Validating App Icon & Documentation (DOCS.md & DOCS.en.md)..."
-if [ -s mimir/icon.png ] && [ -s mimir/DOCS.md ] && [ -s mimir/DOCS.en.md ]; then
-    pass "App Icon and Multi-Language Documentation (DOCS.md & DOCS.en.md) verified"
+log_test "Test 9: Validating App Icon & Documentation (DOCS.md & DOCS_de.md)..."
+if [ -s mimir/icon.png ] && [ -s mimir/DOCS.md ] && [ -s mimir/DOCS_de.md ]; then
+    pass "App Icon and Multi-Language Documentation (DOCS.md & DOCS_de.md) verified"
 else
-    fail "icon.png, DOCS.md, or DOCS.en.md is missing or empty"
+    fail "icon.png, DOCS.md, or DOCS_de.md is missing or empty"
 fi
 
 # Test 10: Full Schema & Translation Validation

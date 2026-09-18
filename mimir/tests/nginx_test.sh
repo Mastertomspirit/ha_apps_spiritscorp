@@ -5,7 +5,7 @@ test_validate_nginx_complete_setup() {
     local nginx_script="${1:-mimir/rootfs/usr/local/lib/mimir/nginx.sh}"
     local ui_file="${2:-mimir/rootfs/var/www/mimir-ui/index.html}"
 
-    log_test "Validating complete Nginx configuration script & UI template..."
+    log_test "Test 8: Validating complete Nginx configuration script & UI template..."
 
     local missing_patterns=()
 

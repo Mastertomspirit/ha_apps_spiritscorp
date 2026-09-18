@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    name: "Build Multi-Arch App (home-assistant/actions/builder)"
+    name: "Build Multi-Arch App (home-assistant/builder)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -33,7 +33,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Build & Publish App with Official HA Builder"
-        uses: home-assistant/actions/builder@master
+        uses: home-assistant/builder@master
         with:
           args: |
             --all \
