@@ -7,27 +7,110 @@ on:
     inputs:
       target:
         description: "App target folder to build (Default: mimir)"
-        required: false
+        required: true
         default: "mimir"
       version:
-        description: "Git Tag or Branch (Default: main)"
-        required: false
+        description: "Git Tag or Branch or all (Default: main)"
+        required: true
         default: "main"
 
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+
 jobs:
+  resolve-targets:
+    name: "Resolve Build Targets"
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.set-targets.outputs.targets }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.version }}
+
+      - name: "Set targets array"
+        id: set-targets
+        run: |
+          if [ "${{ inputs.target }}" = "all" ]; then
+            TARGETS_JSON=$(find . -maxdepth 2 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | jq -R . | jq -s -c .)
+            echo "targets=${TARGETS_JSON}" >> $GITHUB_OUTPUT
+          else
+            echo "targets=[\"${{ inputs.target }}\"]" >> $GITHUB_OUTPUT
+          fi
+
+  init:
+    name: "Initialize Build Matrix for ${{ matrix.target }}"
+    needs: resolve-targets
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.resolve-targets.output.targets) }}
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version }}
+
+      - name: "Get build matrix"
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.09.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name:  "ha-spiritscorp-${{ matrix.target }}"
+          path: ${{ matrix.target }}
+
   build:
-    name: "Build Multi-Arch App Images"
+    name: "Build ${{ matrix.arch }} (${{ matrix.target }})"
+    needs: [resolve-targets, init]
+    runs-on: ${{ matrix.os }}
     permissions:
-      contents: read
-      packages: write
-    uses: home-assistant/actions/.github/workflows/builder.yaml@master
-    with:
-      args: |
-        --amd64 \
-        --aarch64 \
-        --target ${{ inputs.target || 'mimir' }} \
-        --version ${{ inputs.version || github.ref_name }} \        
-        --image "ha-spiritscorp-${{ inputs.target || 'mimir' }}-{arch}" \
-        --docker-hub "ghcr.io/${{ github.repository_owner }}"
-    secrets:
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      contents: read # To check out the code
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push built images to GitHub Container Registry
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.version }}
+
+      - name: "Build image"
+        uses: home-assistant/builder/actions/build-image@2026.09.0
+        with:
+          arch: ${{ matrix.arch }}
+          path: ${{ matrix.target }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          image-tags: |
+            ${{ github.event.release.tag_name || inputs.version }}
+            'latest'
+          push: "true"
+          version: ${{ github.event.release.tag_name || inputs.version }}
+
+  manifest:
+    name: "Publish Multi-Arch Manifest (${{ matrix.target }})"
+    needs: [resolve-targets, init, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push the manifest to GitHub Container Registry
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.init.outputs.targets) }}
+    steps:
+      - name: "Publish multi-arch manifest"
+        uses: home-assistant/builder/actions/publish-multi-arch-manifest@2026.09.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image-name: "ha-spiritscorp-${{ matrix.target }}"
+          image-tags: |
+            ${{ github.event.release.tag_name || inputs.version }}
+            latest

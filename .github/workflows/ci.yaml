@@ -6,8 +6,26 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  ARCHITECTURES: '["amd64", "aarch64"]'
+
 jobs:
-  validate:
+  resolve-targets:
+    name: "Discover App Targets"
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.set-targets.outputs.targets }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v6
+
+      - name: "Find all app folders"
+        id: set-targets
+        run: |
+          TARGETS_JSON=$(find . -maxdepth 2 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | jq -R . | jq -s -c .)
+          echo "targets=${TARGETS_JSON}" >> $GITHUB_OUTPUT
+
+  test_mimir:
     name: "Validate Mimir App & Dockerfile"
     runs-on: ubuntu-latest
     steps:
@@ -30,20 +48,50 @@ jobs:
         run: |
           chmod +x mimir/tests/validate.sh
           mimir/tests/validate.sh
-          
-  build:
-    name: "Verify Multi-Arch Docker Build"
+
+  init:
+    name: "Initialize Build Matrix for ${{ matrix.target }}"
+    needs: [resolve-targets, test_mimir]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.resolve-targets.outputs.targets) }}
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v6
+
+      - name: "Get build matrix"
+        id: matrix
+        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.09.0
+        with:
+          architectures: ${{ env.ARCHITECTURES }}
+          image-name:  "ha-spiritscorp-${{ matrix.target }}"
+          path: ${{ matrix.target }}
+
+  verify_build:
+    name: "Verify ${{ matrix.arch }} Docker Build (${{ matrix.target }})"
+    needs: init
+    runs-on: ${{ matrix.os }}
     permissions:
-      contents: read
-    uses: home-assistant/actions/.github/workflows/builder.yaml@master
-    with:
-      args: |
-        --test \
-        --amd64 \
-        --aarch64 \
-        --target ${{ inputs.target || 'mimir' }} \
-        --version ${{ inputs.version || github.ref_name }} \        
-        --image "ha-spiritscorp-${{ inputs.target || 'mimir' }}-{arch}" \
-        --docker-hub "ghcr.io/${{ github.repository_owner }}"
-    secrets:
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      contents: read # To check out the code
+      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
+      packages: write # To push built images to GitHub Container Registry
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v6
+
+      - name: "Build image (dry-run)"
+        uses: home-assistant/builder/actions/build-image@2026.09.0
+        with:
+          arch: ${{ matrix.arch }}
+          path: ${{ matrix.target }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ matrix.image }}
+          push: "false"
+          version: ${{ github.ref_name }}
