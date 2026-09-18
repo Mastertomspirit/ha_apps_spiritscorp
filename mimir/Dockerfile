@@ -13,6 +13,20 @@ ENV BUILD_ARCH=${BUILD_ARCH}
 ENV BUILD_VERSION=${BUILD_VERSION}
 ENV MIMIR_VERSION=${MIMIR_VERSION}
 
+# Labels
+LABEL \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.type="app" \
+    io.hass.arch="${BUILD_ARCH}" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.licenses="GPL-3.0-or-later" \
+    org.opencontainers.image.version="${BUILD_VERSION}" \
+    org.opencontainers.image.source="https://github.com/Mastertomspirit/ha_apps_spiritscorp" \
+    org.opencontainers.image.documentation="https://github.com/Mastertomspirit/ha_apps_spiritscorp/blob/main/mimir/DOCS.md" \
+    org.opencontainers.image.authors="mastertomspirit <thespirit@spiritscorp.network>"
+
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 # Download official Mimir binary matching the target architecture and verify with official SHA-256

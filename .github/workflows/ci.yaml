@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    name: "Validate App & Dockerfile"
+    name: "Validate Mimir App & Dockerfile"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
