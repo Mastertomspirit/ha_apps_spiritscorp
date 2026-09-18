@@ -5,3 +5,5 @@ build_from:
   amd64: "ghcr.io/home-assistant/amd64-base:latest"
 args:
   MIMIR_VERSION: "3.2.1"
+  BUILD_NAME: "Grafana Mimir"
+  BUILD_DESCRIPTION: "Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant."

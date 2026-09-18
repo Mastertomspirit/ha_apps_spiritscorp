@@ -4,12 +4,11 @@ FROM ${BUILD_FROM}
 # Automatically injected by the Home Assistant Builder
 ARG BUILD_ARCH
 ARG BUILD_VERSION
-ARG BUILD_NAME
-ARG BUILD_DESCRIPTION
-ARG BUILD_TYPE=app
 
 # Manually passed via build.yaml
 ARG MIMIR_VERSION
+ARG BUILD_NAME
+ARG BUILD_DESCRIPTION
 
 # Explicit assignment to retain environment variables at container runtime
 ENV BUILD_ARCH=${BUILD_ARCH}
@@ -18,7 +17,7 @@ ENV MIMIR_VERSION=${MIMIR_VERSION}
 
 # Labels
 LABEL \
-    io.hass.type="${BUILD_TYPE}" \
+	network.spiritscorp.mimir.version="${MIMIR_VERSION}" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
     org.opencontainers.image.licenses="GPL-3.0-or-later" \
@@ -59,15 +58,14 @@ RUN apk add --no-cache \
         fi; \
         echo "SUCCESS: SHA256 checksum verified."; \
     else \
+        echo "WARNING: Could not fetch SHA-256 from release, Build failed."; \
             exit 1; \
-#        echo "WARNING: Could not fetch SHA-256 from release, skipping checksum enforcement."; \
     fi && \
     chmod a+x /usr/local/bin/mimir && \
     mkdir -p /etc/mimir /data/mimir /var/log/mimir /run/nginx /var/log/nginx /var/www/mimir-ui && \
     chmod -R 775 /etc/mimir /data/mimir /var/log/mimir
 
 COPY rootfs/ /
-#COPY config.yaml /etc/mimir/config.yaml
 
 RUN chmod a+x /run.sh /usr/local/bin/mimir-healthcheck
 
