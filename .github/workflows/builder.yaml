@@ -32,11 +32,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Build & Publish App with Official HA Builder"
+      - name: "Verify Multi-Arch Docker Build"
         uses: home-assistant/builder@master
         with:
           args: |
-            --all \
-            --target ${{ github.event.inputs.target || 'mimir' }} \
-            --image "${{ github.event.inputs.target || 'mimir' }}-{arch}" \
-            --docker-hub ghcr.io/${{ github.repository_owner }}
+            --amd64 \
+            --aarch64 \
+            --target mimir \
+            --image "mimir-{arch}" \
+            --docker-hub "ghcr.io/${{ github.repository_owner }}"

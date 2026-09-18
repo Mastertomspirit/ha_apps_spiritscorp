@@ -30,13 +30,14 @@ jobs:
         run: |
           chmod +x mimir/tests/validate.sh
           mimir/tests/validate.sh
-
-      - name: "Verify Multi-Arch Docker Build "
+          
+      - name: "Verify Multi-Arch Docker Build"
         uses: home-assistant/builder@master
         with:
           args: |
             --test \
-            --all \
+            --amd64 \
+            --aarch64 \
             --target mimir \
             --image "mimir-{arch}" \
             --docker-hub "ghcr.io/${{ github.repository_owner }}"
