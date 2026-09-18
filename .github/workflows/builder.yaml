@@ -20,7 +20,7 @@ env:
 jobs:
   resolve-targets:
     name: "Resolve Build Targets"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26
     outputs:
       targets: ${{ steps.set-targets.outputs.targets }}
     steps:
@@ -42,25 +42,40 @@ jobs:
   init:
     name: "Initialize Build Matrix for ${{ matrix.target }}"
     needs: resolve-targets
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target: ${{ fromJSON(needs.resolve-targets.output.targets) }}
+    runs-on: ubuntu-26
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.version }}
-
-      - name: "Get build matrix"
+      - name: Build matrix from architectures
         id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.09.0
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          image-name:  "ha-spiritscorp-${{ matrix.target }}"
+        shell: bash
+        env:
+          ARCHITECTURES: ${{ env.ARCHITECTURES }}
+          REGISTRY_PREFIX: "ghcr.io/${{ github.repository_owner }}"
+          TARGETS: ${{ needs.resolve-targets.outputs.targets }}
+        run: |
+          matrix='{"include":[]}'
+          for target in $(jq -r '.[]' <<< "${TARGETS}"); do
+            IMAGE_NAME="ha-spiritscorp-${target}"
+            for arch in $(jq -r '.[]' <<< "${ARCHITECTURES}"); do
+              case "${arch}" in
+                amd64)   os="ubuntu-24.04" ;;
+                aarch64) os="ubuntu-24.04-arm" ;;
+                *)
+                  echo "::error::Unsupported architecture: ${arch}. Supported values: amd64, aarch64"
+                  exit 1
+                  ;;
+              esac
+              matrix=$(jq -c \
+                --arg target "$target" \
+                --arg arch "$arch" \
+                --arg os "$os" \
+                --arg image "${REGISTRY_PREFIX}/${arch}-${IMAGE_NAME}" \
+                '.include += [{target: $target, arch: $arch, os: $os, image: $image}]' <<< "${matrix}")
+            done
+          done
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+          jq . <<< "${matrix}"
 
   build:
     name: "Build ${{ matrix.arch }} (${{ matrix.target }})"
@@ -84,7 +99,6 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           context: ${{ matrix.target }}
-          file: "${{ matrix.target }}/Dockerfile"
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           image-tags: |
