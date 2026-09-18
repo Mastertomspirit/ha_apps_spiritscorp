@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "App target folder to build (e.g. mimir)"
-        required: true
+        description: "App target folder to build (Default: mimir)"
+        required: false
         default: "mimir"
       version:
-        description: "Version to build and publish (e.g. 1.0.0)"
-        required: true
-        default: "1.0.0"
+        description: "Git Tag or Branch to checkout (Default: main)"
+        required: false
+        default: "main"
 
 jobs:
   build:
@@ -24,7 +24,9 @@ jobs:
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v7
-
+        with:
+           ref: ${{ inputs.version || github.ref }}       
+        
       - name: "Login to GitHub Container Registry"
         uses: docker/login-action@v7
         with:
@@ -32,12 +34,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Verify Multi-Arch Docker Build"
+      - name: "Build App Container"
         uses: home-assistant/builder@master
         with:
           args: |
             --amd64 \
             --aarch64 \
-            --target mimir \
-            --image "mimir-{arch}" \
+            --target ${{ inputs.target || 'mimir' }} \
+            --image "${{ inputs.target || 'mimir' }}-{arch}" \
             --docker-hub "ghcr.io/${{ github.repository_owner }}"
