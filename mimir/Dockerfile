@@ -4,6 +4,9 @@ FROM ${BUILD_FROM}
 # Automatically injected by the Home Assistant Builder
 ARG BUILD_ARCH
 ARG BUILD_VERSION
+ARG BUILD_NAME
+ARG BUILD_DESCRIPTION
+ARG BUILD_TYPE=app
 
 # Manually passed via build.yaml
 ARG MIMIR_VERSION
@@ -15,10 +18,7 @@ ENV MIMIR_VERSION=${MIMIR_VERSION}
 
 # Labels
 LABEL \
-    io.hass.name="${BUILD_NAME}" \
-    io.hass.description="${BUILD_DESCRIPTION}" \
-    io.hass.type="app" \
-    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="${BUILD_TYPE}" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
     org.opencontainers.image.licenses="GPL-3.0-or-later" \
