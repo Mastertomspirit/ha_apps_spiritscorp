@@ -1,4 +1,4 @@
-FROM=ghcr.io/home-assistant/base:latest
+FROM ghcr.io/home-assistant/base:latest
 
 # Automatically injected by the Home Assistant Builder
 ARG BUILD_ARCH
