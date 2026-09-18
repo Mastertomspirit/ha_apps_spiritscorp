@@ -8,32 +8,18 @@ on:
 
 env:
   ARCHITECTURES: '["amd64", "aarch64"]'
+  MONITORED_FILES: "config.json config.yaml config.yml Dockerfile rootfs"
 
 jobs:
-  resolve-targets:
-    name: "Discover App Targets"
-    runs-on: ubuntu-latest
-    outputs:
-      targets: ${{ steps.set-targets.outputs.targets }}
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v6
-
-      - name: "Find all app folders"
-        id: set-targets
-        run: |
-          TARGETS_JSON=$(find . -maxdepth 2 -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | jq -R . | jq -s -c .)
-          echo "targets=${TARGETS_JSON}" >> $GITHUB_OUTPUT
-
   test_mimir:
     name: "Validate Mimir App & Dockerfile"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v7
 
       - name: "Set up Python & ShellCheck"
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v7.0.1
         with:
           python-version: "3.14"
 
@@ -50,66 +36,68 @@ jobs:
           mimir/tests/validate.sh
 
   init:
-    name: "Initialize Build Matrix for ${{ matrix.target }}"
-    needs: [resolve-targets, test_mimir]
-    runs-on: ubuntu-latest
+    name: "Initialize Build"
+    needs: test_mimir
+    runs-on: ubuntu-26
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
     steps:
-      - name: Build matrix from architectures
-        id: matrix
-        shell: bash
-        env:
-          ARCHITECTURES: ${{ env.ARCHITECTURES }}
-          REGISTRY_PREFIX: "ghcr.io/${{ github.repository_owner }}"
-          TARGETS: ${{ needs.resolve-targets.outputs.targets }}
-        run: |
-          matrix='{"include":[]}'
-          for target in $(jq -r '.[]' <<< "${TARGETS}"); do
-            IMAGE_NAME="ha-spiritscorp-${target}"
-            for arch in $(jq -r '.[]' <<< "${ARCHITECTURES}"); do
-              case "${arch}" in
-                amd64)   os="ubuntu-24.04" ;;
-                aarch64) os="ubuntu-24.04-arm" ;;
-                *)
-                  echo "::error::Unsupported architecture: ${arch}. Supported values: amd64, aarch64"
-                  exit 1
-                  ;;
-              esac
-              matrix=$(jq -c \
-                --arg target "$target" \
-                --arg arch "$arch" \
-                --arg os "$os" \
-                --arg image "${REGISTRY_PREFIX}/${arch}-${IMAGE_NAME}" \
-                '.include += [{target: $target, arch: $arch, os: $os, image: $image}]' <<< "${matrix}")
-            done
-          done
-          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
-          jq . <<< "${matrix}"
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
 
-  verify_build:
-    name: "Verify ${{ matrix.arch }} Docker Build (${{ matrix.target }})"
-    needs: [resolve-targets, init]
-    runs-on: ${{ matrix.os }}
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v47
+
+      - name: Find app directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Filter changed apps
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+        run: |
+          changed_apps=()
+            
+          # If the workflow file itself changed, rebuild all apps
+          if [[ "${CHANGED_FILES}" =~ \.github/workflows/(ci|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
+
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-app:
+    name: Build ${{ matrix.app }}
+    needs: init
+    if: needs.init.outputs.changed == 'true'
     permissions:
-      contents: read # To check out the code
-      id-token: write # Write needed for Cosign signing (issue OIDC token for signing)
-      packages: write # To push built images to GitHub Container Registry
+      contents: read
+      id-token: write
+      packages: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v6
-
-      - name: "Build image (dry-run)"
-        uses: home-assistant/builder/actions/build-image@2026.09.0
-        with:
-          arch: ${{ matrix.arch }}
-          context: ${{ matrix.target }}
-          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
-          image: ${{ matrix.image }}
-          push: "false"
-          image-tags: |
-            ${{ github.event.release.tag_name || inputs.version }}
-          version: ${{ github.ref_name }}
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: false
+      version: "main"
+    secrets: inherit

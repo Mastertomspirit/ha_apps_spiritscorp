@@ -1,9 +1,0 @@
-# Home Assistant App Multi-Arch Build Definition
-# Maps target hardware architectures to official base images and build arguments
-build_from:
-  aarch64: "ghcr.io/home-assistant/aarch64-base:latest"
-  amd64: "ghcr.io/home-assistant/amd64-base:latest"
-args:
-  MIMIR_VERSION: "3.2.1"
-  BUILD_NAME: "Grafana Mimir"
-  BUILD_DESCRIPTION: "Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant."

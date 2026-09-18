@@ -1,14 +1,10 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
-FROM ${BUILD_FROM}
+FROM=ghcr.io/home-assistant/base:latest
 
 # Automatically injected by the Home Assistant Builder
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 
-# Manually passed via build.yaml
-ARG MIMIR_VERSION
-ARG BUILD_NAME
-ARG BUILD_DESCRIPTION
+ARG MIMIR_VERSION="3.2.1"
 
 # Explicit assignment to retain environment variables at container runtime
 ENV BUILD_ARCH=${BUILD_ARCH}
@@ -18,8 +14,8 @@ ENV MIMIR_VERSION=${MIMIR_VERSION}
 # Labels
 LABEL \
 	network.spiritscorp.mimir.version="${MIMIR_VERSION}" \
-    org.opencontainers.image.title="${BUILD_NAME}" \
-    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.title="Grafana Mimir" \
+    org.opencontainers.image.description="Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant." \
     org.opencontainers.image.licenses="GPL-3.0-or-later" \
     org.opencontainers.image.version="${BUILD_VERSION}" \
     org.opencontainers.image.source="https://github.com/Mastertomspirit/ha_apps_spiritscorp" \
