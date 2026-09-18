@@ -24,7 +24,7 @@ jobs:
 
       - name: "Run ShellCheck on test scripts"
         run: |
-          find . -type f -name "*.sh" -exec shellcheck {} +
+          find . -type f -name "*.sh" -exec shellcheck -x {} +
 
       - name: "Run App Test Suite"
         run: |
