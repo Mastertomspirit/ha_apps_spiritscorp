@@ -5,9 +5,7 @@
 
 mimir_configure_nginx() {
     local nginx_auth_map
-    local proxy_scheme
     local proxy_listen_block
-    local escaped_token
 
     mkdir -p "$(dirname "${MIMIR_NGINX_CONF}")"
 
@@ -29,7 +27,6 @@ EOF_NGINX_AUTH_OFF
 )
     fi
 
-    proxy_scheme="http"
     proxy_listen_block=""
     if is_true "${TLS_ENABLED}"; then
         proxy_listen_block="    add_header X-Frame-Options \"SAMEORIGIN\" always;

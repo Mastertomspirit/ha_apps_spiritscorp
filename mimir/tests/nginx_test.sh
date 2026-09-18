@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+# shellcheck disable=SC2120
 test_validate_nginx_complete_setup() {
     local nginx_script="${1:-mimir/rootfs/usr/local/lib/mimir/nginx.sh}"
     local ui_file="${2:-mimir/rootfs/var/www/mimir-ui/index.html}"
