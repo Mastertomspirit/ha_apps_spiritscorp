@@ -6,9 +6,13 @@
 
 set -Eeuo pipefail
 
+# shellcheck source=mimir/rootfs/usr/local/lib/mimir/common.sh
 source /usr/local/lib/mimir/common.sh
+# shellcheck source=mimir/rootfs/usr/local/lib/mimir/config.sh
 source /usr/local/lib/mimir/config.sh
+# shellcheck source=mimir/rootfs/usr/local/lib/mimir/nginx.sh
 source /usr/local/lib/mimir/nginx.sh
+# shellcheck source=mimir/rootfs/usr/local/lib/mimir/start.sh
 source /usr/local/lib/mimir/start.sh
 
 mimir_load_options

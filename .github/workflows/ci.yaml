@@ -28,9 +28,8 @@ jobs:
 
       - name: "Run App Test Suite"
         run: |
-          cd mimir/tests
-          chmod +x ./validate.sh
-          ./validate.sh
+          chmod +x mimir/tests/validate.sh
+          mimir/tests/validate.sh
 
       - name: "Verify Multi-Arch Docker Build "
         uses: home-assistant/builder@master

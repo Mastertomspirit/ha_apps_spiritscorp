@@ -29,8 +29,8 @@ fail() {
     FAILED=$((FAILED + 1))
 }
 
-source ./nginx_test.sh
-source ./translate_test.sh
+source mimir/tests/nginx_test.sh
+source mimir/tests/translate_test.sh
 
 echo -e "${YELLOW}======================================================${NC}"
 echo -e "${YELLOW} SpiritScorp Home Assistant App Validation Suite      ${NC}"
