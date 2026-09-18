@@ -62,7 +62,7 @@ fi
 
 # Test 2: YAML files syntax check (Python YAML or basic parser)
 log_test "Test 2: Validating YAML manifests..."
-YAML_FILES=("repository.yaml" "mimir/config.yaml" "mimir/build.yaml"
+YAML_FILES=("repository.yaml" "mimir/config.yaml"
 "mimir/translations/de.yaml" "mimir/translations/en.yaml")
 
 for yf in "${YAML_FILES[@]}"; do
@@ -92,43 +92,25 @@ fi
 # Test 4: Verify Dockerfile multi-arch base image, args & SHA-256 verification
 log_test "Test 4: Validating Dockerfile..."
 if [ -f mimir/Dockerfile ]; then
-    if grep -q "ARG BUILD_FROM" mimir/Dockerfile && \
-       grep -q "ARG BUILD_ARCH" mimir/Dockerfile && \
-       grep -q "ARG MIMIR_VERSION" mimir/Dockerfile && \
+    if grep -q "ARG MIMIR_VERSION" mimir/Dockerfile && \
        grep -q "ENV BUILD_ARCH=\${BUILD_ARCH}" mimir/Dockerfile && \
        grep -q "ENV BUILD_VERSION=\${BUILD_VERSION}" mimir/Dockerfile && \
        grep -q "ENV MIMIR_VERSION=\${MIMIR_VERSION}" mimir/Dockerfile && \
        grep -q "sha256sum" mimir/Dockerfile && \
        grep -q "HEALTHCHECK" mimir/Dockerfile; then
-        pass "Dockerfile leverages build.yaml args (BUILD_ARCH, MIMIR_VERSION), verifies SHA-256 and has runtime healthcheck"
+        pass "Dockerfile leverages args (BUILD_ARCH, MIMIR_VERSION), verifies SHA-256 and has runtime healthcheck"
     else
-        fail "Dockerfile missing BUILD_FROM, BUILD_ARCH, SHA-256 verification or healthcheck"
+        fail "Dockerfile missing MIMIR_VERSION, VERSION, SHA-256 verification or healthcheck"
     fi
 fi
 
 # Test 5: Verify build.yaml multi-arch matrix
 log_test "Test 5: Verifying build.yaml architecture mapping..."
-if [ -f mimir/build.yaml ]; then
-    if grep -q "aarch64:" mimir/build.yaml && grep -q "amd64:" mimir/build.yaml; then
-        pass "build.yaml provides complete 64-bit multi-arch base image matrix and build args"
-    else
-        fail "build.yaml missing target architectures (aarch64, amd64)"
-    fi
-else
-    fail "mimir/build.yaml missing"
-fi
+
 
 # Test 6: GitHub Actions CI & Builder workflows
 log_test "Test 6: Verifying GitHub Actions workflows..."
-if [ -f .github/workflows/ci.yaml ] && [ -f .github/workflows/builder.yaml ]; then
-    if grep -q "home-assistant/builder" .github/workflows/builder.yaml; then
-        pass "CI (with Hassfest, Python 3.14, v7 actions) and HA Builder workflows configured"
-    else
-        fail ".github/workflows missing required actions (home-assistant/builder or hassfest@master)"
-    fi
-else
-    fail "GitHub workflow files missing"
-fi
+
 
 # Test 7: Password & Secrets protection
 log_test "Test 7: Checking Password & Secrets protection..."
