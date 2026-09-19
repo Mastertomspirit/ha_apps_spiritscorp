@@ -18,7 +18,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.sha }}
 
       - name: 🔍 Find app directories
         id: apps
@@ -35,7 +35,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.sha }}
 
       - name: 🚀 Run Home Assistant App Lint
         uses: frenck/action-addon-linter@v2.21

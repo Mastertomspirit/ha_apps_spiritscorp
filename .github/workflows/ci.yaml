@@ -98,5 +98,5 @@ jobs:
     with:
       app: ${{ matrix.app }}
       publish: false
-      version: ${{ github.ref_name }}
+      version: ${{ github.sha }}
     secrets: inherit
