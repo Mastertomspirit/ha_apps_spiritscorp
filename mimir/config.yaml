@@ -8,9 +8,8 @@ url: "https://github.com/mastertomspirit/ha_apps_spiritscorp/tree/main/mimir"
 arch:
   - aarch64
   - amd64
-init: true
+image: "ghcr.io/mastertomspirit/ha-spiritscorp-mimir"
 timeout: 60
-stage: "stable"
 
 # UI Ingress integration into Home Assistant sidebar
 ingress: true

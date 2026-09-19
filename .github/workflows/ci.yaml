@@ -2,13 +2,16 @@ name: "CI & App Validation"
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "fix/*"]
   pull_request:
     branches: ["main"]
 
+env:
+  MONITORED_FILES: "config.json config.yaml config.yml Dockerfile rootfs"
+
 jobs:
-  validate:
-    name: "Validate App & Dockerfile"
+  test_mimir:
+    name: "Validate Mimir App & Dockerfile"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
@@ -24,20 +27,76 @@ jobs:
 
       - name: "Run ShellCheck on test scripts"
         run: |
-          find . -type f -name "*.sh" -exec shellcheck {} +
+          find . -type f -name "*.sh" -exec shellcheck -x {} +
 
       - name: "Run App Test Suite"
         run: |
-          cd mimir/tests
-          chmod +x ./validate.sh
-          ./validate.sh
+          chmod +x mimir/tests/validate.sh
+          mimir/tests/validate.sh
 
-      - name: "Verify Multi-Arch Docker Build "
-        uses: home-assistant/actions/builder@master
-        with:
-          args: |
-            --test \
-            --all \
-            --target mimir \
-            --image "mimir-{arch}" \
-            --docker-hub "ghcr.io/${{ github.repository_owner }}"
+  init:
+    name: "Initialize Build"
+    needs: test_mimir
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v47
+
+      - name: Find app directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Filter changed apps
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+        run: |
+          changed_apps=()
+            
+          # If the workflow file itself changed, rebuild all apps
+          if [[ "${CHANGED_FILES}" =~ \.github/workflows/(ci|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
+
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-app:
+    name: Build ${{ matrix.app }}
+    needs: init
+    if: needs.init.outputs.changed == 'true'
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: false
+      version: ${{ github.sha }}
+    secrets: inherit

@@ -1,17 +1,26 @@
-ARG BUILD_FROM
-FROM ${BUILD_FROM}
+FROM ghcr.io/home-assistant/base:latest
 
 # Automatically injected by the Home Assistant Builder
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 
-# Manually passed via build.yaml
-ARG MIMIR_VERSION
+ARG MIMIR_VERSION="3.2.1"
 
 # Explicit assignment to retain environment variables at container runtime
 ENV BUILD_ARCH=${BUILD_ARCH}
 ENV BUILD_VERSION=${BUILD_VERSION}
 ENV MIMIR_VERSION=${MIMIR_VERSION}
+
+# Labels
+LABEL \
+	network.spiritscorp.mimir.version="${MIMIR_VERSION}" \
+    org.opencontainers.image.title="Grafana Mimir" \
+    org.opencontainers.image.description="Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant." \
+    org.opencontainers.image.licenses="GPL-3.0-or-later" \
+    org.opencontainers.image.version="${BUILD_VERSION}" \
+    org.opencontainers.image.source="https://github.com/Mastertomspirit/ha_apps_spiritscorp" \
+    org.opencontainers.image.documentation="https://github.com/Mastertomspirit/ha_apps_spiritscorp/blob/main/mimir/DOCS.md" \
+    org.opencontainers.image.authors="mastertomspirit <thespirit@spiritscorp.network>"
 
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
@@ -45,15 +54,14 @@ RUN apk add --no-cache \
         fi; \
         echo "SUCCESS: SHA256 checksum verified."; \
     else \
+        echo "WARNING: Could not fetch SHA-256 from release, Build failed."; \
             exit 1; \
-#        echo "WARNING: Could not fetch SHA-256 from release, skipping checksum enforcement."; \
     fi && \
     chmod a+x /usr/local/bin/mimir && \
     mkdir -p /etc/mimir /data/mimir /var/log/mimir /run/nginx /var/log/nginx /var/www/mimir-ui && \
     chmod -R 775 /etc/mimir /data/mimir /var/log/mimir
 
 COPY rootfs/ /
-#COPY config.yaml /etc/mimir/config.yaml
 
 RUN chmod a+x /run.sh /usr/local/bin/mimir-healthcheck
 

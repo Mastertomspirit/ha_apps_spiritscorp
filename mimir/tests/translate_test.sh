@@ -9,7 +9,7 @@ test_validate_translations() {
         "mimir/translations/en.yaml"
     )
 
-    log_test "Validating schema configuration & translation files (DE & EN)..."
+    log_test "Test 9: Validating schema configuration & translation files (DE & EN)..."
 
     local missing_patterns=()
 

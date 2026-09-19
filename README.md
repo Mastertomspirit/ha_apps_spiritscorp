@@ -1,12 +1,12 @@
-[ [German](README_de.md) | [English](README.md) ]
+<div align="center">  
+  <a href="https://github.com/Mastertomspirit/ha_apps_spiritscorp/blob/main/README_de.md"><img src="https://img.shields.io/badge/README-🇩🇪_Deutsch-red?style=plastic" alt="README Deutsch"></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/Mastertomspirit/ha_apps_spiritscorp/blob/main/README.md"><img src="https://img.shields.io/badge/English_🇬🇧-README-grey?labelColor=blue&style=plastic" alt="README English"></a>
+</div>
 
 # SpiritScorp Home Assistant Apps
 
 High-performance and production-grade apps for your Home Assistant infrastructure. Focused on advanced observability, monitoring, and scalable metrics processing.
-
----
-
-[![Open your Home Assistant instance and show the App Store with a specific repository filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FMastertomspirit%2Fha_apps_spiritscorp)
 
 ---
 

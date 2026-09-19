@@ -1,12 +1,18 @@
 # Dependabot configuration for SpiritScorp Home Assistant App
-# Automates weekly dependency updates for GitHub Actions & Docker Base Images
+# Automates daily dependency updates for GitHub Actions & Docker Base Images
 version: 2
 updates:
   # Maintain GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "main"
     schedule:
       interval: "daily"
+    reviewers:
+      - "mastertomspirit"
+    labels:
+      - "dependencies"
+      - "github-actions"
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -15,8 +21,14 @@ updates:
   # Maintain Docker base image updates (Home Assistant Base)
   - package-ecosystem: "docker"
     directory: "/mimir"
+    target-branch: "main"
     schedule:
       interval: "daily"
+    reviewers:
+      - "mastertomspirit"
+    labels:
+      - "dependencies"
+      - "docker"
     commit-message:
       prefix: "docker"
       include: "scope"

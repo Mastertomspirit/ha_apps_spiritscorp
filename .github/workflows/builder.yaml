@@ -6,37 +6,87 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "App target folder to build (e.g. mimir)"
+        description: "App target folder to build (Default: mimir)"
         required: true
         default: "mimir"
       version:
-        description: "Version to build and publish (e.g. 1.0.0)"
+        description: "Git Tag or Branch or all (Default: main)"
         required: true
-        default: "1.0.0"
+        default: "main"
+
+env:
+    MONITORED_FILES: "config.json config.yaml config.yml Dockerfile rootfs"
 
 jobs:
-  build:
-    name: "Build Multi-Arch App (home-assistant/actions/builder)"
+  init:
+    name: "Initialize Build"
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.version }}
+
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@v47
+
+      - name: Find app directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@master
+
+      - name: Filter changed apps
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          changed_apps=()
+            
+          # If the workflow file itself changed, rebuild all apps
+          if [[ "${CHANGED_FILES}" =~ \.github/workflows/(builder|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              if [[ "${TARGET}" == "all" || "${TARGET}" == "${app}" ]]; then
+                changed_apps+=("${app}")
+                continue
+              fi
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
+
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-app:
+    name: Build ${{ matrix.app }}
+    needs: init
+    if: needs.init.outputs.changed == 'true'
     permissions:
       contents: read
+      id-token: write
       packages: write
-    steps:
-      - name: "Checkout Repository"
-        uses: actions/checkout@v7
-
-      - name: "Login to GitHub Container Registry"
-        uses: docker/login-action@v7
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Build & Publish App with Official HA Builder"
-        uses: home-assistant/actions/builder@master
-        with:
-          args: |
-            --all \
-            --target ${{ github.event.inputs.target || 'mimir' }} \
-            --image "${{ github.event.inputs.target || 'mimir' }}-{arch}" \
-            --docker-hub ghcr.io/${{ github.repository_owner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: true
+      version: ${{ github.event.release.tag_name || inputs.version }}
+    secrets: inherit
