@@ -16,7 +16,7 @@ jobs:
       apps: ${{ steps.apps.outputs.addons_list }}
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@7
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
 
