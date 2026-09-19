@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  contents: read
+  packages: read
+
 env:
   MONITORED_FILES: "config.json config.yaml config.yml Dockerfile rootfs"
 
