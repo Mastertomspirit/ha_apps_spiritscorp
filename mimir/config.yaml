@@ -9,9 +9,7 @@ arch:
   - aarch64
   - amd64
 image: "ghcr.io/mastertomspirit/ha-spiritscorp-mimir"
-init: true
 timeout: 60
-stage: "stable"
 
 # UI Ingress integration into Home Assistant sidebar
 ingress: true
