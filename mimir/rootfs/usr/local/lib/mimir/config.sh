@@ -218,7 +218,10 @@ ${STORAGE_YAML}
     ship_concurrency: 10
   bucket_store:
     sync_dir: ${STORAGE_PATH}/tsdb-sync
-#    lazy_index_loading_enabled: false
+	index_header:
+      lazy_loading_enabled: true
+      # Release the file from disk only after 24 hours of inactivity
+      lazy_loading_idle_timeout: 13h
 
 compactor:
   data_dir: ${STORAGE_PATH}/compactor
