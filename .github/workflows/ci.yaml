@@ -2,9 +2,11 @@ name: "CI & App Validation"
 
 on:
   push:
-    branches: ["main", "fix/*"]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main", "dev" ]
+  schedule:
+    - cron: "23 23 * * *"
 
 permissions:
   contents: read
