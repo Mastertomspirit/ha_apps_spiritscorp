@@ -4,7 +4,7 @@ FROM ghcr.io/home-assistant/base:latest
 ARG BUILD_ARCH
 ARG BUILD_VERSION
 
-ARG MIMIR_VERSION="3.2.1"
+ARG MIMIR_VERSION="3.2.3"
 
 # Explicit assignment to retain environment variables at container runtime
 ENV BUILD_ARCH=${BUILD_ARCH}

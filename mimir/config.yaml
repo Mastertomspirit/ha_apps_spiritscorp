@@ -1,7 +1,7 @@
 # Home Assistant App Configuration
 # Built for network.spiritscorp / ha_apps_spiritscorp
 name: "Grafana Mimir"
-version: "0.8.2"
+version: "0.8.3"
 slug: "mimir"
 description: "Grafana Mimir for Prometheus-compatible long-term metrics storage in Home Assistant."
 url: "https://github.com/mastertomspirit/ha_apps_spiritscorp/tree/main/mimir"
