@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Upgraded Grafana Mimir core component from `3.2.1` to `3.2.3`.
 - Configured `index_header` lazy loading with an idle timeout (`13h`) to prevent premature cache eviction and eliminate spurious disk-stat warning logs.
+- Standardized CI and Lint workflow triggers to consistently run on `push` and `pull_request` for `main` and `dev` branches.
 
 ### Fixed
 - Fixed missing permission definitions in GitHub Actions CI workflows to resolve CodeQL security scanning alerts.
