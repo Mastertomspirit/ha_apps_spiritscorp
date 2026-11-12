@@ -1,7 +1,7 @@
 # Home Assistant App: Grafana Mimir
 
 [![GitHub Release](https://img.shields.io/github/v/release/mastertomspirit/ha_apps_spiritscorp?style=plastic&logo=github&label=Release&color=blue)](https://github.com/mastertomspirit/ha_apps_spiritscorp/releases)
-[![Grafana Mimir Core](https://img.shields.io/badge/Mimir-v3.2.3-orange?style=plastic&logo=grafana)](https://grafana.com/oss/mimir/)
+[![Grafana Mimir Core](https://img.shields.io/badge/Mimir-v3.2.4-orange?style=plastic&logo=grafana)](https://grafana.com/oss/mimir/)
 [![CI Build Status](https://img.shields.io/github/actions/workflow/status/mastertomspirit/ha_apps_spiritscorp/ci.yaml?branch=main&style=plastic&logo=githubactions&label=Build)](https://github.com/mastertomspirit/ha_apps_spiritscorp/actions/workflows/ci.yaml)
 
 [![Architecture](https://img.shields.io/badge/Arch-aarch64%20%7C%20amd64-green.svg?style=plastic)](https://github.com/mastertomspirit/ha_apps_spiritscorp)
