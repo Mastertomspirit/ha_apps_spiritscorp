@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.4] - 2026-11-12
+
+### Changed
+- Upgraded Grafana Mimir core component from `3.2.3` to `3.2.4`.
+
 ## [0.8.3] - 2026-10-30
 
 ### Changed
