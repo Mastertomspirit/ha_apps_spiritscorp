@@ -43,19 +43,35 @@
           <div class="stat-desc">Interner HTTP Probe über Nginx Ingress-Proxy</div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Prometheus Remote-Write</span></div>
-          <div class="stat-val" style="font-size: 18px; color: #38bdf8;">Interner Port 9009</div>
-          <div class="stat-desc">Direkte Push-Übertragung ohne offenes LAN-Risiko</div>
+          <div class="card-header"><span class="card-title">DB Größe (Festplatte)</span></div>
+          <div id="dash-db-size" class="stat-val" style="color: #38bdf8;">Lade...</div>
+          <div id="dash-db-path" class="stat-desc">Pfad: /data/mimir</div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Grafana Datasource</span></div>
-          <div class="stat-val" style="font-size: 18px; color: #a855f7;">Prometheus API</div>
-          <div class="stat-desc">Grafana Mimir TSDB Langzeit-Abfragen</div>
+          <div class="card-header"><span class="card-title">Tagesdurchschnitt</span></div>
+          <div id="dash-db-avg" class="stat-val" style="color: #10b981;">—</div>
+          <div id="dash-db-avg-desc" class="stat-desc">Ø Zuwachs / Tag &amp; Bestand</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Aktive TSDB-Serien</span></div>
+          <div id="dash-active-series" class="stat-val" style="color: #a855f7;">—</div>
+          <div id="dash-series-desc" class="stat-desc">Live aus Mimir /metrics</div>
         </div>
       </div>
 
       <div class="card" style="margin-bottom: 16px;">
-        <div class="card-header"><span class="card-title">Interne Endpunkte für Home Assistant & Grafana</span></div>
+        <div class="card-header">
+          <span class="card-title">DB Speicherplatz-Verlauf (Tage)</span>
+          <button class="btn-sm" onclick="loadStorageStats(); loadDashboardMimirStats();">↻ Aktualisieren</button>
+        </div>
+        <div id="storage-chart-meta" class="stat-desc" style="margin-bottom: 12px;">
+          Lade Speicherhistorie von ./proxy/storage-stats.json ...
+        </div>
+        <div id="storage-chart" class="storage-chart"></div>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px;">
+        <div class="card-header"><span class="card-title">Interne Endpunkte für Home Assistant &amp; Grafana</span></div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
           Nutze im Home Assistant Docker-Netzwerk direkt den Hostnamen der App.
           So muss Port 9009 <strong>nicht</strong> ungesichert in deinem Heimnetzwerk geöffnet werden:

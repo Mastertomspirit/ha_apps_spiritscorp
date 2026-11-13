@@ -231,9 +231,142 @@ function filterMetrics() {
   outputContainer.innerText = matchingLines.slice(0, 50000).join('\n') || "Keine übereinstimmenden Metriken gefunden.";
 }
 
+/**
+ * Formats byte count into human-readable units (B, KB, MB, GB, TB).
+ *
+ * @param {number} bytes
+ * @returns {string}
+ */
+function formatBytes(bytes) {
+  const abs = Math.abs(Number(bytes) || 0);
+  const sign = (Number(bytes) || 0) < 0 ? '-' : '';
+  if (abs < 1024) return sign + abs + ' B';
+  const units = ['KB', 'MB', 'GB', 'TB'];
+  let val = abs / 1024;
+  let idx = 0;
+  while (val >= 1024 && idx < units.length - 1) {
+    val /= 1024;
+    idx++;
+  }
+  return sign + val.toFixed(val >= 100 ? 0 : val >= 10 ? 1 : 2) + ' ' + units[idx];
+}
+
+/**
+ * Fetches DB disk size and daily history from ./proxy/storage-stats.json
+ * and renders the stat cards + bar chart.
+ *
+ * @returns {void}
+ */
+function loadStorageStats() {
+  fetch(baseIngressUrl + 'proxy/storage-stats.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(res => {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(data => {
+      const sizeEl = document.getElementById('dash-db-size');
+      const pathEl = document.getElementById('dash-db-path');
+      const avgEl = document.getElementById('dash-db-avg');
+      const avgDescEl = document.getElementById('dash-db-avg-desc');
+      const metaEl = document.getElementById('storage-chart-meta');
+      const chartEl = document.getElementById('storage-chart');
+
+      if (sizeEl) sizeEl.innerText = formatBytes(data.current_bytes || 0);
+      if (pathEl) pathEl.innerText = 'Pfad: ' + (data.storage_path || '/data/mimir');
+
+      const daysTracked = Number(data.days_tracked || 1);
+      const avgTotal = Number(data.daily_avg_bytes || 0);
+      const avgGrowth = Number(data.daily_growth_avg_bytes || 0);
+      if (avgEl) {
+        avgEl.innerText = daysTracked > 1
+          ? (avgGrowth >= 0 ? '+' : '') + formatBytes(avgGrowth) + ' / Tag'
+          : formatBytes(avgTotal);
+      }
+      if (avgDescEl) {
+        avgDescEl.innerText = 'Ø Bestand: ' + formatBytes(avgTotal) + ' (' + daysTracked + ' Tag' + (daysTracked === 1 ? '' : 'e') + ')';
+      }
+      if (metaEl) {
+        metaEl.innerText = 'Erfasste Tage: ' + daysTracked + ' (max. 90) · Letzte Messung: ' + (data.updated_at || '—');
+      }
+
+      if (chartEl) {
+        const hist = Array.isArray(data.history) ? data.history.slice(-30) : [];
+        if (hist.length === 0) {
+          chartEl.innerHTML = '<div class="stat-desc">Noch keine Verlaufsdaten vorhanden.</div>';
+          return;
+        }
+        const maxBytes = Math.max(1, ...hist.map(item => Number(item.bytes) || 0));
+        chartEl.innerHTML = hist.map(item => {
+          const b = Number(item.bytes) || 0;
+          const pct = Math.max(4, Math.round((b / maxBytes) * 100));
+          const shortDate = String(item.date || '').slice(5);
+          const label = formatBytes(b);
+          return '<div class="storage-bar-col" title="' + (item.date || '') + ': ' + label + '">' +
+            '<div class="storage-bar-val">' + label + '</div>' +
+            '<div class="storage-bar-track"><div class="storage-bar" style="height:' + pct + '%;"></div></div>' +
+            '<div class="storage-bar-date">' + shortDate + '</div>' +
+          '</div>';
+        }).join('');
+      }
+    })
+    .catch(() => {
+      const sizeEl = document.getElementById('dash-db-size');
+      const metaEl = document.getElementById('storage-chart-meta');
+      if (sizeEl && sizeEl.innerText === 'Lade...') sizeEl.innerText = '—';
+      if (metaEl) metaEl.innerText = 'Speicherstatistik wird nach dem ersten Messintervall angezeigt.';
+    });
+}
+
+/**
+ * Extracts key TSDB stats directly from Mimir's /metrics endpoint for the Dashboard.
+ *
+ * @returns {void}
+ */
+function loadDashboardMimirStats() {
+  fetch(mimirProxyUrl + 'metrics', { cache: 'no-store' })
+    .then(res => (res.ok ? res.text() : Promise.reject(new Error('HTTP ' + res.status))))
+    .then(text => {
+      const sumMetric = (name) => {
+        const re = new RegExp('^' + name + '(?:\\{[^}]*\\})?\\s+([0-9eE.+\\-]+)', 'gm');
+        let total = 0;
+        let found = false;
+        let m;
+        while ((m = re.exec(text)) !== null) {
+          const v = Number(m[1]);
+          if (!isNaN(v)) {
+            total += v;
+            found = true;
+          }
+        }
+        return found ? total : null;
+      };
+
+      const memSeries = sumMetric('cortex_ingester_memory_series');
+      const headSeries = sumMetric('cortex_ingester_tsdb_head_series');
+      const activeSeries = memSeries !== null ? memSeries : headSeries;
+      const compactorRuns = sumMetric('cortex_compactor_runs_completed_total');
+
+      const seriesEl = document.getElementById('dash-active-series');
+      const seriesDescEl = document.getElementById('dash-series-desc');
+      if (seriesEl) {
+        seriesEl.innerText = activeSeries !== null ? Math.round(activeSeries).toLocaleString('de-DE') : '—';
+      }
+      if (seriesDescEl && compactorRuns !== null) {
+        seriesDescEl.innerText = 'Compactor-Läufe: ' + Math.round(compactorRuns).toLocaleString('de-DE');
+      }
+    })
+    .catch(() => {});
+}
+
 // Initial health probe and periodic background check every 10 seconds
 document.addEventListener('DOMContentLoaded', () => {
   checkHealth();
+  loadStorageStats();
+  loadDashboardMimirStats();
   setInterval(checkHealth, 10000);
+  setInterval(() => {
+    loadStorageStats();
+    loadDashboardMimirStats();
+  }, 60000);
 });
 
