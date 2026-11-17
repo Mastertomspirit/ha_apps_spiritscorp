@@ -101,6 +101,14 @@ server {
         proxy_hide_header Content-Security-Policy;
     }
 
+    # DB Disk Usage & Daily History JSON (written by start.sh)
+    location = /proxy/storage-stats.json {
+        alias ${MIMIR_RUNTIME_DIR}/storage-stats.json;
+        default_type application/json;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        expires off;
+    }
+
     # Internal health check for Nginx
     location /healthz {
         access_log off;
