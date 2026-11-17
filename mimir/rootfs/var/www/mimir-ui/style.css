@@ -340,3 +340,61 @@ iframe {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   z-index: 1000;
 }
+
+/* DB Storage History Chart */
+.storage-chart {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 14px 10px;
+  min-height: 150px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.storage-bar-col {
+  flex: 1 1 28px;
+  min-width: 24px;
+  max-width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.storage-bar-track {
+  width: 100%;
+  height: 96px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.storage-bar {
+  width: 100%;
+  min-height: 4px;
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-radius: 4px 4px 2px 2px;
+  transition: height 0.2s ease, opacity 0.15s ease;
+}
+
+.storage-bar:hover {
+  opacity: 0.85;
+}
+
+.storage-bar-val {
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.storage-bar-date {
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
