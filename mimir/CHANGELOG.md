@@ -1,15 +1,9 @@
-# Changelog - Grafana Mimir Home Assistant App
-
-All notable changes to this Home Assistant App will be documented in this file.
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
----
-
 ## [0.9.0] - 2026-11-17
 
-### Changed
+### Added
 - Added periodic Mimir database storage tracking (90-day history) exposed via Nginx ingress. Enhanced the web dashboard with current DB size, daily growth averages, active TSDB series, and a 30-day storage bar chart.
+
+### Changed
 - Upgraded Grafana Mimir core component to `3.2.5`.
 
 ## [0.8.4] - 2026-11-12
